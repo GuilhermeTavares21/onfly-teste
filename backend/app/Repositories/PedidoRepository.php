@@ -20,10 +20,34 @@ class PedidoRepository
         if (!empty($filters['inicio']) && !empty($filters['fim'])) {
             $query->whereBetween('data_ida', [$filters['inicio'], $filters['fim']]);
         }
-
+        
         return $query->get();
     }
 
+    public function all($filters = [])
+    {
+        $query = Pedido::query();
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['destino'])) {
+            $query->where('destino', 'like', "%{$filters['destino']}%");
+        }
+
+        if (!empty($filters['inicio']) && !empty($filters['fim'])) {
+            $query->whereBetween('data_ida', [$filters['inicio'], $filters['fim']]);
+        }
+
+        if (!empty($filters['usuario'])) {
+            $query->whereHas('user', function($q) use ($filters) {
+                $q->where('name', 'like', "%{$filters['usuario']}%");
+        });
+    }
+
+        return $query->get();
+    }
     public function findById($id, $userId)
     {
         return Pedido::where('user_id', $userId)->findOrFail($id);
