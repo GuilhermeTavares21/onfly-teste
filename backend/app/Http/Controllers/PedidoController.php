@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PedidoRequest;
 use App\Services\PedidoService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class PedidoController extends Controller
@@ -14,7 +15,7 @@ class PedidoController extends Controller
         $this->service = $service;
     }
 
-    public function index(\Illuminate\Http\Request $request)
+    public function index(Request $request)
     {
         try {
             $pedidos = $this->service->list($request->all());
@@ -47,7 +48,7 @@ class PedidoController extends Controller
         }
     }
 
-    public function updateStatus(\Illuminate\Http\Request $request, $id)
+    public function updateStatus(Request $request, $id)
     {
         try {
             $pedido = $this->service->updateStatus($id, $request->status);
