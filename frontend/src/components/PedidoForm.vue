@@ -29,7 +29,6 @@ async function submit() {
     data_ida.value = '';
     data_volta.value = '';
     alert('Pedido criado com sucesso!');
-    // Emitir evento para atualizar lista
     emit('pedido-criado');
   } catch (err) {
     alert('Erro ao criar pedido: ' + err.response?.data?.error || err.message);

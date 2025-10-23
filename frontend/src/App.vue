@@ -1,12 +1,12 @@
 <template>
   <v-app>
-    <Navbar />   <!-- seu header -->
+    <Navbar />
     <v-main>
       <v-container>
-        <router-view />  <!-- as páginas do Vue Router -->
+        <router-view />
       </v-container>
     </v-main>
-    <Footer /> <!-- footer bonito que vamos criar -->
+    <Footer />
   </v-app>
 </template>
 

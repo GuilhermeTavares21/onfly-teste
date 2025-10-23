@@ -1,14 +1,23 @@
 <template>
-  <v-container class="login-container">
+  <v-container class="register-container">
     <v-row class="fill-height d-flex align-center justify-center">
       <v-col cols="12" md="8" lg="7">
-        <v-card class="login-card" elevation="8">
+        <v-card class="register-card" elevation="8">
           <v-row no-gutters>
             <v-col cols="12" md="6" class="form-section d-flex flex-column justify-center pa-8">
-              <h2 class="login-title">Bem-vindo 👋</h2>
-              <p class="login-subtitle mb-6">
-                Faça login para acessar o seu painel e continuar de onde parou.
+              <h2 class="register-title">Crie sua conta 🚀</h2>
+              <p class="register-subtitle mb-6">
+                Preencha os campos abaixo para começar a usar o sistema.
               </p>
+
+              <v-text-field
+                label="Nome"
+                v-model="name"
+                variant="outlined"
+                color="primary"
+                density="comfortable"
+                class="mb-4"
+              ></v-text-field>
 
               <v-text-field
                 label="Email"
@@ -26,34 +35,51 @@
                 variant="outlined"
                 color="primary"
                 density="comfortable"
-                class="mb-6"
+                class="mb-4"
               ></v-text-field>
+
+              <v-text-field
+                label="Confirmar Senha"
+                v-model="passwordConfirmation"
+                type="password"
+                variant="outlined"
+                color="primary"
+                density="comfortable"
+                class="mb-4"
+              ></v-text-field>
+
+              <v-checkbox
+                v-model="isAdmin"
+                color="primary"
+                label="Será administrador?"
+                class="mb-6"
+              ></v-checkbox>
 
               <v-btn
                 color="primary"
                 block
                 size="large"
                 rounded
-                @click="login"
+                @click="register"
               >
-                Entrar
+                Registrar
                 <v-icon class="ml-2" right size="18">mdi-arrow-right-circle</v-icon>
               </v-btn>
 
               <div class="mt-4 text-center">
                 <small class="text-secondary">
-                  Ainda não tem conta?
-                  <span class="link" @click="router.push('/register')">Cadastre-se</span>
+                  Já tem uma conta?
+                  <span class="link" @click="router.push('/login')">Fazer login</span>
                 </small>
               </div>
             </v-col>
 
             <v-col cols="12" md="6" class="image-section d-none d-md-flex">
               <v-img
-                src="/login.webp"
-                alt="Imagem do login"
+                src="/register.png"
+                alt="Imagem de registro"
                 contain
-                class="login-image"
+                class="register-image"
               ></v-img>
             </v-col>
           </v-row>
@@ -73,13 +99,17 @@
 <script setup>
 import api from '../axios'
 import { ref, reactive } from 'vue'
-import { useUserStore } from '../stores/user'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '../stores/user'
 
+const router = useRouter()
+const userStore = useUserStore()
+
+const name = ref('')
 const email = ref('')
 const password = ref('')
-const userStore = useUserStore()
-const router = useRouter()
+const passwordConfirmation = ref('')
+const isAdmin = ref(false)
 
 const snackbar = reactive({
   show: false,
@@ -87,31 +117,45 @@ const snackbar = reactive({
   color: 'red',
 })
 
-async function login() {
+async function register() {
   try {
-    const response = await api.post('/login', { 
-      email: email.value, 
-      password: password.value 
-    })
+    if (password.value !== passwordConfirmation.value) {
+      snackbar.message = 'As senhas não são iguais.'
+      snackbar.color = 'red'
+      snackbar.show = true
+      return
+    }
+
+    const payload = {
+      name: name.value,
+      email: email.value,
+      password: password.value,
+      password_confirmation: passwordConfirmation.value,
+      is_admin: isAdmin.value,
+    }
+
+    const response = await api.post('/register', payload)
 
     userStore.setUser(response.data.user, response.data.token)
     router.push('/dashboard')
   } catch (err) {
     snackbar.message = (err.response?.data?.message || err.message)
+    snackbar.color = 'red'
     snackbar.show = true
   }
 }
 </script>
 
 <style scoped>
-.login-container {
+.register-container {
   height: 85vh;
+  min-width: 1400px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.login-card {
+.register-card {
   border-radius: 16px;
   overflow: hidden;
 }
@@ -124,20 +168,24 @@ async function login() {
   background-color: #f9fbff;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  position: relative;
 }
 
-.login-image {
-  max-width: 90%;
-  margin: auto;
+.register-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
-.login-title {
+.register-title {
   font-weight: 700;
   color: #007bff;
   font-size: 1.8rem;
 }
 
-.login-subtitle {
+.register-subtitle {
   color: #666;
   font-size: 0.95rem;
 }

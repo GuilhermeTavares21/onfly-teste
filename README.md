@@ -1,41 +1,76 @@
-# Onfly - Backend Laravel
+# Onfly - Gerenciador de Pedidos
 
-Este projeto é um backend em Laravel para gerenciamento de pedidos, incluindo autenticação via Sanctum, envio de emails de atualização de pedidos e estrutura em camadas (Controllers, Services, Repositories, Requests).
+Este é um projeto full-stack de gerenciamento de pedidos, construído com Laravel (Backend) e Vue.js/Vuetify (Frontend), totalmente containerizado com Docker.
 
-Tecnologias utilizadas:
-- PHP 8.2
-- Laravel 12
-- MySQL (Docker)
-- Sanctum para autenticação
-- Mailtrap para envio de emails de teste
-- Docker
+## Principais Funcionalidades
 
----
+* **Autenticação Completa:** Registro e Login via API (Laravel Sanctum).
 
-## Rodando o projeto com Docker
+* **Controle de Acesso (ACL):**
 
-### 1. Clonar o repositório
+  * **Usuário Admin:** Visualiza todos os pedidos, filtra por usuário e pode alterar o status.
 
+  * **Usuário Comum:** Visualiza e cria apenas seus próprios pedidos.
+
+* **Gerenciamento de Pedidos:** CRUD completo de pedidos de viagem (destino, datas).
+
+* **Notificações por Email:** Disparo automático de emails (via Mailtrap) para o usuário quando o status de seu pedido é alterado por um admin.
+
+* **Dashboard Reativo:** Tabela de pedidos com filtros dinâmicos e feedback visual (loading) em tempo real.
+
+## Tecnologias Utilizadas
+
+| | **Backend (API)** | **Frontend (Cliente)** | 
+| :--- | :--- | :--- |
+| | PHP 8.2 | Vue 3 (Composition API) | 
+| | Laravel 12 | Vuetify 3 | 
+| | MySQL | Pinia (Gerenciamento de Estado) | 
+| | Laravel Sanctum (Auth) | Vue Router | 
+| | Mailtrap (Testes de Email) | Vite (Build Tool) | 
+| | Docker & Docker Compose | Axios | 
+
+## Pré-requisitos
+
+Antes de começar, garanta que você tenha as seguintes ferramentas instaladas:
+
+* [Docker](https://www.docker.com/get-started)
+
+* [Docker Compose](https://docs.docker.com/compose/install/)
+
+* [Node.js](https://nodejs.org/en/) (v20 ou superior)
+
+* NPM (geralmente incluído no Node.js)
+
+## 🚀 Começando (Rodando o Projeto)
+
+Siga os passos abaixo para configurar e rodar a aplicação completa (Backend e Frontend).
+
+### 1. Clonar o Repositório
+
+\`\`\`bash
 git clone <repo-url>
+\`\`\`
+
+### 2. Configuração do Backend (Docker)
+
+O backend roda inteiramente dentro de containers Docker.
+
+\`\`\`bash
 cd backend
+\`\`\`
 
-### 2. Configurar `.env`
+**a. Configurar \`.env\`**
 
-Copie o arquivo de exemplo:
+Copie o arquivo de exemplo.
 
+\`\`\`bash
 cp .env.example .env
+\`\`\`
 
-Edite as variáveis:
+Abra o arquivo \`.env\` e configure suas credenciais do Mailtrap:
 
-APP_NAME=Onfly
-APP_ENV=local
-APP_KEY=
-APP_DEBUG=true
-APP_URL=http://localhost
-
-DB_CONNECTION=mysql
+\`\`\`ini
 DB_HOST=db
-DB_PORT=3306
 DB_DATABASE=onfly_db
 DB_USERNAME=laravel
 DB_PASSWORD=laravel
@@ -45,129 +80,137 @@ MAIL_HOST=sandbox.smtp.mailtrap.io
 MAIL_PORT=2525
 MAIL_USERNAME=<SEU_USUARIO_MAILTRAP>
 MAIL_PASSWORD=<SUA_SENHA_MAILTRAP>
-MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=hello@example.com
-MAIL_FROM_NAME="Onfly"
+\`\`\`
 
-> Troque `<SEU_USUARIO_MAILTRAP>` e `<SUA_SENHA_MAILTRAP>` pelos dados da sua conta Mailtrap.
+**b. Build e Up dos Containers**
 
-### 3. Build e up do Docker
+Suba os serviços (PHP-FPM, MySQL, Nginx) em background:
 
+\`\`\`bash
 docker-compose up -d --build
+\`\`\`
 
-Isso irá subir:
-- PHP-FPM + Laravel
-- MySQL
+**c. Migrations e Seeders**
 
-Mailtrap não precisa de container, apenas SMTP configurado no `.env`.
+Entre no container da aplicação:
 
-### 4. Rodar migrations e seeders
-
-Entre no container do app:
-
+\`\`\`bash
 docker exec -it onfly-app bash
+\`\`\`
 
-Dentro do container, rode:
+Dentro do container, rode as migrations e os seeders para popular o banco com usuários de teste:
 
+\`\`\`bash
 php artisan migrate
-
-Para criar **usuários default** de teste (ADMIN e local):
-
 php artisan db:seed --class=UserSeeder
+\`\`\`
 
-Usuários criados:
-- `user@adm.test` → ADMIN (senha: 123456)
-- `user@local.test` → Usuário normal (senha: 123456)
+> **Usuários de Teste Criados:**
+>
+> * **Admin:** \`user@adm.test\` (senha: \`1234a56\`)
+>
+> * **Comum:** \`user@local.test\` (senha: \`123456\`)
 
-> Esse seed pode ser rodado quantas vezes quiser, ele verifica se o usuário já existe.
+Saia do container (\`exit\`).
 
-### 5. Rodar a aplicação
+### 3. Configuração do Frontend (Local)
 
-php artisan serve --host=0.0.0.0
+O frontend rodará localmente em sua máquina, consumindo a API do Docker.
 
-A aplicação estará disponível em: `http://localhost:8000`
+\`\`\`bash
+cd frontend
+\`\`\`
 
----
+**a. Instalar Dependências**
 
-## Endpoints principais
+\`\`\`bash
+npm install
+\`\`\`
 
-Autenticação:
+**b. Rodar o Servidor de Desenvolvimento**
 
-| Método | Rota            | Descrição                  |
-|--------|----------------|----------------------------|
-| POST   | /api/register   | Criar usuário              |
-| POST   | /api/login      | Login e retorna token      |
-| GET    | /api/user       | Dados do usuário (Auth)   |
-| POST   | /api/logout     | Logout                     |
+\`\`\`bash
+npm run dev
+\`\`\`
 
-Pedidos:
+### 4. Aplicação em Execução
 
-| Método | Rota                        | Descrição                       |
-|--------|-----------------------------|---------------------------------|
-| GET    | /api/pedidos                | Listar pedidos do usuário       |
-| POST   | /api/pedidos                | Criar pedido                    |
-| GET    | /api/pedidos/{id}           | Detalhar pedido                 |
-| PATCH  | /api/pedidos/{id}/status    | Atualizar status (admin only)  |
+Parabéns! A aplicação está pronta:
 
----
+* **API Backend:** \`http://localhost:8000\`
 
-## Envio de emails
+* **Aplicação Frontend:** \`http://localhost:5173\` (ou a porta indicada pelo Vite)
 
-- Sempre que um pedido for alterado, um email será enviado ao usuário responsável.
-- Configuração feita via Mailtrap para testes.
-- Layout do email usa cor base `#009efb` e assinatura `Onfly`.
+## 🧪 Testes (Backend)
 
----
+Todos os testes unitários e de feature foram criados. Para rodá-los, entre no container da aplicação e execute o Artisan:
 
-## Testes
-
-- Todos os testes unitários e feature foram criados.
-- Para rodar os testes dentro do container:
-
+\`\`\`bash
 docker exec -it onfly-app bash
+
+# Dentro do container
 php artisan test
+\`\`\`
 
-Isso executa **todos os testes unitários e de feature** e mostra o resultado no terminal.
+## Endpoints Principais da API
 
-- Lembre-se de rodar o container com o banco e gerar migrations/seeders antes.
+### Autenticação
 
----
+| **Método** | **Rota** | **Descrição** | 
+| :--- | :--- | :--- |
+| POST | \`/api/register\` | Criar usuário (aceita \`is_admin\`) | 
+| POST | \`/api/login\` | Login e retorna token Sanctum | 
+| GET | \`/api/user\` | (Autenticado) Dados do usuário | 
+| POST | \`/api/logout\` | (Autenticado) Invalida o token | 
 
-## Estrutura do projeto
+### Pedidos (Autenticado)
 
-- Controllers: recebimento de requests e retorno de respostas JSON.
-- Services: regras de negócio.
-- Repositories: acesso ao banco via Eloquent.
-- Requests: validação de dados.
-- Models: Eloquent Models com relacionamentos.
-- Mail: templates de emails.
-- Tests: testes unitários e feature tests.
+| **Método** | **Rota** | **Descrição** | 
+| :--- | :--- | :--- |
+| GET | \`/api/pedidos\` | Lista pedidos (com filtros) | 
+| POST | \`/api/pedidos\` | Criar novo pedido | 
+| GET | \`/api/pedidos/{id}\` | Detalhar um pedido | 
+| PATCH | \`/api/pedidos/{id}/status\` | **(Admin)** Atualizar status | 
 
----
+## Estrutura dos Projetos
 
-## Dicas
+### Backend (Laravel)
 
-- Gere a APP_KEY automaticamente ao build do Docker ou via Tinker:
+* \`app/Http/Controllers\`: Recebe requests e retorna JSON.
 
-php artisan key:generate
+* \`app/Services\`: Camada de regras de negócio.
 
-- Sempre limpe cache de config depois de alterar `.env`:
+* \`app/Repositories\`: Camada de acesso ao banco (Eloquent).
 
-php artisan config:clear
-php artisan cache:clear
+* \`app/Http/Requests\`: Validação de dados de entrada.
 
-- Para testar emails localmente, utilize Mailtrap e verifique Inbox > Messages.
+* \`app/Mail\`: Classes de Mailable para notificações.
 
----
+* \`routes/api.php\`: Definição dos endpoints.
 
-## Pronto!
+* \`tests/\`: Testes unitários e de feature (Pest).
 
-Agora o backend está funcional com:
+### Frontend (Vue)
 
-- Autenticação via Sanctum
-- CRUD de Pedidos
-- Envio de emails de alteração
-- Validações via Requests
-- Logs detalhados de erros
-- Usuários de teste (ADMIN e local)
-- Testes automatizados
+* \`src/views\`: Telas principais (Login.vue, Dashboard.vue).
+
+* \`src/components\`: Componentes reutilizáveis (PedidosTable.vue, NavBar.vue).
+
+* \`src/stores\`: Gerenciamento de estado (Pinia) para usuário e auth.
+
+* \`src/router\`: Rotas do Vue Router.
+
+* \`src/axios.js\`: Instância do Axios pré-configurada com a URL da API.
+
+## Observações e Dicas
+
+* **Emails:** A funcionalidade de envio de emails (alteração de status) só funcionará se as credenciais do Mailtrap estiverem corretas no \`.env\` do backend.
+
+* **Cache do Laravel:** Se você alterar o \`.env\` com o container já rodando, limpe o cache de configuração do Laravel:
+
+  \`\`\`bash
+  docker exec -it onfly-app php artisan config:clear
+  \`\`\`
+
+* **APP_KEY:** A \`APP_KEY\` do Laravel é gerada automaticamente pelo \`Dockerfile\` durante o build.
