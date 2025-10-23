@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -14,6 +15,7 @@ class AuthTest extends TestCase
         $response = $this->postJson('/api/register', [
             'name' => 'Teste User',
             'email' => 'teste@user.com',
+            'is_admin' => false,
             'password' => '123456',
             'password_confirmation' => '123456',
         ]);

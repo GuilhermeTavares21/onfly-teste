@@ -20,6 +20,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'is_admin' => $request->is_admin,
             'password' => Hash::make($request->password),
         ]);
 
@@ -39,7 +40,7 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! \Hash::check($request->password, $user->password)) {
-            return response()->json(['error' => 'Credenciais inválidas'], 401);
+            return response()->json(['error' => 'Credenciais inválidas', 'message' => 'Usuário ou senha estão incorretos.'], 401);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;

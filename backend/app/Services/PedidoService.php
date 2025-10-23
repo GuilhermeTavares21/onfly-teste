@@ -18,7 +18,11 @@ class PedidoService
 
     public function list($filters = [])
     {
-        return $this->repository->allByUser(Auth::id(), $filters);
+        if(Auth::user()->is_admin){
+            return $this->repository->all($filters);
+        } else {
+            return $this->repository->allByUser(Auth::id(), $filters);
+        }
     }
 
     public function create($data)
