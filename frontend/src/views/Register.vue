@@ -93,6 +93,8 @@
         <v-btn text @click="snackbar.show = false">Fechar</v-btn>
       </template>
     </v-snackbar>
+
+    <PlaneLoading v-model="loadingRegister" text="Criando sua conta..." />
   </v-container>
 </template>
 
@@ -101,6 +103,7 @@ import api from '../axios'
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import PlaneLoading from '../components/PlaneLoading.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -111,6 +114,8 @@ const password = ref('')
 const passwordConfirmation = ref('')
 const isAdmin = ref(false)
 
+const loadingRegister = ref(false)
+
 const snackbar = reactive({
   show: false,
   message: '',
@@ -118,6 +123,7 @@ const snackbar = reactive({
 })
 
 async function register() {
+  loadingRegister.value = true
   try {
     if (password.value !== passwordConfirmation.value) {
       snackbar.message = 'As senhas não são iguais.'
@@ -135,13 +141,14 @@ async function register() {
     }
 
     const response = await api.post('/register', payload)
-
     userStore.setUser(response.data.user, response.data.token)
     router.push('/dashboard')
   } catch (err) {
-    snackbar.message = (err.response?.data?.message || err.message)
+    snackbar.message = err.response?.data?.message || err.message
     snackbar.color = 'red'
     snackbar.show = true
+  } finally {
+    loadingRegister.value = false
   }
 }
 </script>

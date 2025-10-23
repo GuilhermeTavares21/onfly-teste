@@ -67,10 +67,12 @@
         <v-btn text @click="snackbar.show = false">Fechar</v-btn>
       </template>
     </v-snackbar>
+    <PlaneLoading v-model="loadingLogin" text="Autenticando..." />
   </v-container>
 </template>
 
 <script setup>
+import PlaneLoading from '../components/PlaneLoading.vue'
 import api from '../axios'
 import { ref, reactive } from 'vue'
 import { useUserStore } from '../stores/user'
@@ -81,6 +83,8 @@ const password = ref('')
 const userStore = useUserStore()
 const router = useRouter()
 
+const loadingLogin = ref(false)
+
 const snackbar = reactive({
   show: false,
   message: '',
@@ -88,6 +92,13 @@ const snackbar = reactive({
 })
 
 async function login() {
+  if (!email.value || !password.value) {
+    snackbar.message = 'Preencha email e senha.'
+    snackbar.show = true
+    return
+  }
+
+  loadingLogin.value = true
   try {
     const response = await api.post('/login', { 
       email: email.value, 
@@ -99,6 +110,8 @@ async function login() {
   } catch (err) {
     snackbar.message = (err.response?.data?.message || err.message)
     snackbar.show = true
+  } finally {
+    loadingLogin.value = false
   }
 }
 </script>

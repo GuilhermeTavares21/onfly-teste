@@ -72,7 +72,7 @@
           </v-card-title>
           <v-card-text class="pa-0">
             <v-row dense>
-              <v-col cols="12" md="4" v-if="user.is_admin">
+              <v-col cols="12" md="4" v-if="user && user.is_admin">
                 <v-text-field
                   v-model="filters.usuario"
                   label="Filtrar por usuário"
@@ -143,7 +143,7 @@
               ></v-progress-circular>
               
               <template v-else>
-                <v-menu v-if="user.is_admin" offset-y>
+                <v-menu v-if="user && user.is_admin" offset-y>
                   <template v-slot:activator="{ props }">
                     <v-btn icon="mdi-dots-vertical" variant="text" v-bind="props"></v-btn>
                   </template>
@@ -217,6 +217,7 @@
 
       </v-container>
     </v-main>
+    <PlaneLoading v-model="loadingGlobal" text="Carregando pedidos..." />
   </v-app>
 </template>
 
@@ -224,11 +225,14 @@
 import api from '../axios'
 import { ref, onMounted, computed, reactive, watch } from 'vue'
 import { useUserStore } from '../stores/user'
+import PlaneLoading from '../components/PlaneLoading.vue'
 
 export default {
   setup() {
     const userStore = useUserStore()
     const user = computed(() => userStore.user)
+
+    const loadingGlobal = ref(false)
 
     const pedidos = ref([])
     const loading = ref(false)
@@ -299,6 +303,7 @@ export default {
 
     const fetchPedidos = async () => {
       loading.value = true
+      loadingGlobal.value = true
       try {
         const params = { ...filters.value }
         Object.keys(params).forEach(key => {
@@ -316,6 +321,7 @@ export default {
         showSnackbar('Erro ao carregar pedidos', 'error')
       } finally {
         loading.value = false
+        // loadingGlobal.value = false
       }
     }
     watch([() => filters.value.usuario, () => filters.value.destino], () => {
@@ -361,7 +367,7 @@ export default {
         showSnackbar('Pedido criado com sucesso!', 'success')
       } catch (err) {
         console.error(err)
-        showSnackbar(err.response?.data?.error || 'Erro ao criar pedido', 'error')
+        showSnackbar(err.response?.data?.message || 'Erro ao criar pedido', 'error')
       }
     }
 
@@ -405,6 +411,7 @@ export default {
       onConfirmAction,
       onCancelAction,
       updatingItemId,
+      loadingGlobal,
     }
   },
 }
