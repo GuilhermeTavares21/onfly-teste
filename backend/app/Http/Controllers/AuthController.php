@@ -30,10 +30,11 @@ class AuthController extends Controller
 
             return response()->json($user, 201);
         } catch (ValidationException $e) {
-            return response()->json(['error' => $e->errors()], 422);
+            $firstError = collect($e->errors())->flatten()->first();
+            return response()->json(['message' => $firstError], 422);
         } catch (\Exception $e) {
-            Log::error('Erro ao registrar usuário', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Erro ao registrar usuário'], 500);
+            Log::error('Erro ao registrar usuário', ['message' => $e->getMessage()]);
+            return response()->json(['message' => 'Erro ao registrar usuário'], 500);
         }
     }
 
@@ -49,9 +50,9 @@ class AuthController extends Controller
 
             return response()->json($login, 200);
         } catch (ValidationException $e) {
-            return response()->json(['error' => $e->errors()], 422);
+            return response()->json(['message   ' => $e->errors()], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 401);
+            return response()->json(['message' => $e->getMessage()], 401);
         }
     }
 
@@ -66,8 +67,8 @@ class AuthController extends Controller
             $this->service->logout($request->user());
             return response()->json(['message' => 'Logout realizado.']);
         } catch (\Exception $e) {
-            Log::error('Erro ao realizar logout', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Erro ao realizar logout'], 500);
+            Log::error('Erro ao realizar logout', ['message' => $e->getMessage()]);
+            return response()->json(['message' => 'Erro ao realizar logout'], 500);
         }
     }
 }

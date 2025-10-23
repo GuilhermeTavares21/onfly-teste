@@ -25,12 +25,13 @@ class PedidoRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
-        Log::error('Erro de validação no PedidoRequest', $validator->errors()->toArray());
+        $firstError = collect($validator->errors()->all())->first();
 
-        throw new HttpResponseException(response()->json([
-            'success' => false,
-            'message' => 'Erro de validação',
-            'errors' => $validator->errors(),
-        ], 422));
+        throw new HttpResponseException(
+            response()->json([
+                'success' => false,
+                'message' => $firstError
+            ], 422)
+        );
     }
 }

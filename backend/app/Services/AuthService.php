@@ -17,6 +17,9 @@ class AuthService
 
     public function register(array $data)
     {
+        // Simulando um tempo de espera para exibir os loadings no front
+        sleep(1.5);
+
         $data['password'] = Hash::make($data['password']);
         $user = $this->repository->createUser($data);
 
@@ -30,6 +33,9 @@ class AuthService
 
     public function login(array $data)
     {
+        // Simulando um tempo de espera para exibir os loadings no front
+        sleep(1.5);
+
         $user = $this->repository->findByEmail($data['email']);
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
