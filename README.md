@@ -47,29 +47,29 @@ Siga os passos abaixo para configurar e rodar a aplicação completa (Backend e 
 
 ### 1. Clonar o Repositório
 
-\`\`\`bash
+```bash
 git clone <repo-url>
-\`\`\`
+```
 
 ### 2. Configuração do Backend (Docker)
 
 O backend roda inteiramente dentro de containers Docker.
 
-\`\`\`bash
+```bash
 cd backend
-\`\`\`
+```
 
-**a. Configurar \`.env\`**
+**a. Configurar `.env`**
 
 Copie o arquivo de exemplo.
 
-\`\`\`bash
+```bash
 cp .env.example .env
-\`\`\`
+```
 
-Abra o arquivo \`.env\` e configure suas credenciais do Mailtrap:
+Abra o arquivo `.env` e configure suas credenciais do Mailtrap:
 
-\`\`\`ini
+```ini
 DB_HOST=db
 DB_DATABASE=onfly_db
 DB_USERNAME=laravel
@@ -81,77 +81,77 @@ MAIL_PORT=2525
 MAIL_USERNAME=<SEU_USUARIO_MAILTRAP>
 MAIL_PASSWORD=<SUA_SENHA_MAILTRAP>
 MAIL_FROM_ADDRESS=hello@example.com
-\`\`\`
+```
 
 **b. Build e Up dos Containers**
 
 Suba os serviços (PHP-FPM, MySQL, Nginx) em background:
 
-\`\`\`bash
+```bash
 docker-compose up -d --build
-\`\`\`
+```
 
 **c. Migrations e Seeders**
 
 Entre no container da aplicação:
 
-\`\`\`bash
+```bash
 docker exec -it onfly-app bash
-\`\`\`
+```
 
 Dentro do container, rode as migrations e os seeders para popular o banco com usuários de teste:
 
-\`\`\`bash
+```bash
 php artisan migrate
 php artisan db:seed --class=UserSeeder
-\`\`\`
+```
 
 > **Usuários de Teste Criados:**
 >
-> * **Admin:** \`user@adm.test\` (senha: \`1234a56\`)
+> * **Admin:** `user@adm.test` (senha: `1234a56`)
 >
-> * **Comum:** \`user@local.test\` (senha: \`123456\`)
+> * **Comum:** `user@local.test` (senha: `123456`)
 
-Saia do container (\`exit\`).
+Saia do container (`exit`).
 
 ### 3. Configuração do Frontend (Local)
 
 O frontend rodará localmente em sua máquina, consumindo a API do Docker.
 
-\`\`\`bash
+```bash
 cd frontend
-\`\`\`
+```
 
 **a. Instalar Dependências**
 
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 **b. Rodar o Servidor de Desenvolvimento**
 
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 ### 4. Aplicação em Execução
 
 Parabéns! A aplicação está pronta:
 
-* **API Backend:** \`http://localhost:8000\`
+* **API Backend:** `http://localhost:8000`
 
-* **Aplicação Frontend:** \`http://localhost:5173\` (ou a porta indicada pelo Vite)
+* **Aplicação Frontend:** `http://localhost:5173` (ou a porta indicada pelo Vite)
 
 ## 🧪 Testes (Backend)
 
 Todos os testes unitários e de feature foram criados. Para rodá-los, entre no container da aplicação e execute o Artisan:
 
-\`\`\`bash
+```bash
 docker exec -it onfly-app bash
 
 # Dentro do container
 php artisan test
-\`\`\`
+```
 
 ## Endpoints Principais da API
 
@@ -159,58 +159,58 @@ php artisan test
 
 | **Método** | **Rota** | **Descrição** | 
 | :--- | :--- | :--- |
-| POST | \`/api/register\` | Criar usuário (aceita \`is_admin\`) | 
-| POST | \`/api/login\` | Login e retorna token Sanctum | 
-| GET | \`/api/user\` | (Autenticado) Dados do usuário | 
-| POST | \`/api/logout\` | (Autenticado) Invalida o token | 
+| POST | `/api/register` | Criar usuário (aceita `is_admin`) | 
+| POST | `/api/login` | Login e retorna token Sanctum | 
+| GET | `/api/user` | (Autenticado) Dados do usuário | 
+| POST | `/api/logout` | (Autenticado) Invalida o token | 
 
 ### Pedidos (Autenticado)
 
 | **Método** | **Rota** | **Descrição** | 
 | :--- | :--- | :--- |
-| GET | \`/api/pedidos\` | Lista pedidos (com filtros) | 
-| POST | \`/api/pedidos\` | Criar novo pedido | 
-| GET | \`/api/pedidos/{id}\` | Detalhar um pedido | 
-| PATCH | \`/api/pedidos/{id}/status\` | **(Admin)** Atualizar status | 
+| GET | `/api/pedidos` | Lista pedidos (com filtros) | 
+| POST | `/api/pedidos` | Criar novo pedido | 
+| GET | `/api/pedidos/{id}` | Detalhar um pedido | 
+| PATCH | `/api/pedidos/{id}/status` | **(Admin)** Atualizar status | 
 
 ## Estrutura dos Projetos
 
 ### Backend (Laravel)
 
-* \`app/Http/Controllers\`: Recebe requests e retorna JSON.
+* `app/Http/Controllers`: Recebe requests e retorna JSON.
 
-* \`app/Services\`: Camada de regras de negócio.
+* `app/Services`: Camada de regras de negócio.
 
-* \`app/Repositories\`: Camada de acesso ao banco (Eloquent).
+* `app/Repositories`: Camada de acesso ao banco (Eloquent).
 
-* \`app/Http/Requests\`: Validação de dados de entrada.
+* `app/Http/Requests`: Validação de dados de entrada.
 
-* \`app/Mail\`: Classes de Mailable para notificações.
+* `app/Mail`: Classes de Mailable para notificações.
 
-* \`routes/api.php\`: Definição dos endpoints.
+* `routes/api.php`: Definição dos endpoints.
 
-* \`tests/\`: Testes unitários e de feature (Pest).
+* `tests/`: Testes unitários e de feature (Pest).
 
 ### Frontend (Vue)
 
-* \`src/views\`: Telas principais (Login.vue, Dashboard.vue).
+* `src/views`: Telas principais (Login.vue, Dashboard.vue).
 
-* \`src/components\`: Componentes reutilizáveis (PedidosTable.vue, NavBar.vue).
+* `src/components`: Componentes reutilizáveis (PedidosTable.vue, NavBar.vue).
 
-* \`src/stores\`: Gerenciamento de estado (Pinia) para usuário e auth.
+* `src/stores`: Gerenciamento de estado (Pinia) para usuário e auth.
 
-* \`src/router\`: Rotas do Vue Router.
+* `src/router`: Rotas do Vue Router.
 
-* \`src/axios.js\`: Instância do Axios pré-configurada com a URL da API.
+* `src/axios.js`: Instância do Axios pré-configurada com a URL da API.
 
 ## Observações e Dicas
 
-* **Emails:** A funcionalidade de envio de emails (alteração de status) só funcionará se as credenciais do Mailtrap estiverem corretas no \`.env\` do backend.
+* **Emails:** A funcionalidade de envio de emails (alteração de status) só funcionará se as credenciais do Mailtrap estiverem corretas no `.env` do backend.
 
-* **Cache do Laravel:** Se você alterar o \`.env\` com o container já rodando, limpe o cache de configuração do Laravel:
+* **Cache do Laravel:** Se você alterar o `.env` com o container já rodando, limpe o cache de configuração do Laravel:
 
-  \`\`\`bash
+  ```bash
   docker exec -it onfly-app php artisan config:clear
-  \`\`\`
+  ```
 
-* **APP_KEY:** A \`APP_KEY\` do Laravel é gerada automaticamente pelo \`Dockerfile\` durante o build.
+* **APP_KEY:** A `APP_KEY` do Laravel é gerada automaticamente pelo `Dockerfile` durante o build.
