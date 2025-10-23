@@ -108,7 +108,7 @@ php artisan db:seed --class=UserSeeder
 
 > **Usuários de Teste Criados:**
 >
-> * **Admin:** `user@adm.test` (senha: `1234a56`)
+> * **Admin:** `user@adm.test` (senha: `123456`)
 >
 > * **Comum:** `user@local.test` (senha: `123456`)
 
