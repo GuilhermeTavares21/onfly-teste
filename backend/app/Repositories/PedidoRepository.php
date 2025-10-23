@@ -5,6 +5,7 @@ use App\Models\Pedido;
 
 class PedidoRepository
 {
+    // Coleta todos os pedidos por usuário único com filtros
     public function allByUser($userId, $filters = [])
     {
         $query = Pedido::where('user_id', $userId);
@@ -24,6 +25,7 @@ class PedidoRepository
         return $query->get();
     }
 
+    // Coleta todos os pedidos de todos os usuários com filtros
     public function all($filters = [])
     {
         $query = Pedido::query();

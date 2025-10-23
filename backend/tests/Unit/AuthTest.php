@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -10,6 +10,7 @@ use Laravel\Sanctum\Sanctum;
 
 class AuthTest extends TestCase
 {
+    use RefreshDatabase;
     public function test_register_user()
     {
         $response = $this->postJson('/api/register', [

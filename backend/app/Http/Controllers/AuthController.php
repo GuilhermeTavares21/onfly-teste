@@ -2,54 +2,57 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    protected $service;
+
+    public function __construct(AuthService $service)
+    {
+        $this->service = $service;
+    }
+
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:6',
-        ]);
+        try {
+            $data = $request->validate([
+                'name' => 'required|string',
+                'email' => 'required|string|email|unique:users',
+                'password' => 'required|string|min:6|confirmed',
+                'is_admin' => 'boolean'
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'is_admin' => $request->is_admin,
-            'password' => Hash::make($request->password),
-        ]);
+            $user = $this->service->register($data);
 
-        return response()->json([
-            'user' => $user,
-            'token' => $user->createToken('api-token')->plainTextToken,
-        ], 201);
+            return response()->json($user, 201);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Erro ao registrar usuário', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Erro ao registrar usuário'], 500);
+        }
     }
 
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        try {
+            $data = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|string',
+            ]);
 
-        $user = User::where('email', $request->email)->first();
+            $login = $this->service->login($data);
 
-        if (! $user || ! \Hash::check($request->password, $user->password)) {
-            return response()->json(['error' => 'Credenciais inválidas', 'message' => 'Usuário ou senha estão incorretos.'], 401);
+            return response()->json($login, 200);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 401);
         }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'ok',
-            'token' => $token,
-            'user' => $user
-        ], 200);
     }
 
     public function user(Request $request)
@@ -59,8 +62,12 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logout realizado.']);
+        try {
+            $this->service->logout($request->user());
+            return response()->json(['message' => 'Logout realizado.']);
+        } catch (\Exception $e) {
+            Log::error('Erro ao realizar logout', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Erro ao realizar logout'], 500);
+        }
     }
 }
-
