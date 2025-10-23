@@ -56,7 +56,7 @@ git clone <repo-url>
 O backend roda inteiramente dentro de containers Docker.
 
 ```bash
-cd backend
+cd onfly-teste/backend
 ```
 
 **a. Configurar `.env`**
@@ -119,10 +119,12 @@ Saia do container (`exit`).
 O frontend rodará localmente em sua máquina, consumindo a API do Docker.
 
 ```bash
-cd frontend
+cd onfly-teste/frontend
 ```
 
 **a. Instalar Dependências**
+
+Utilize Node na versão 20 ou superior.
 
 ```bash
 npm install
