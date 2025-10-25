@@ -48,7 +48,6 @@ O backend roda inteiramente dentro de containers Docker.
 
 ```bash
 cd onfly-teste/backend
-cd onfly-teste/backend
 ```
 
 **a. Configurar `.env`**
