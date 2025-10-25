@@ -1,4 +1,3 @@
-const readme = `
 # Onfly - Gerenciador de Pedidos
 
 Este é um projeto full-stack de gerenciamento de pedidos, construído com Laravel (Backend) e Vue.js/Vuetify (Frontend), totalmente containerizado com Docker.
@@ -215,6 +214,5 @@ Parabéns! A aplicação está pronta:
   ```
 
 * **APP_KEY e JWT_SECRET:** São gerados automaticamente pelo entrypoint do container na primeira execução.
-`;
 
 export default readme;
