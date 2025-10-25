@@ -13,10 +13,14 @@ export const useUserStore = defineStore('user', {
     setUser(user, token) {
       this.user = user;
       this.token = token;
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', token);
     },
     logout() {
       this.user = null;
       this.token = null;
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
     },
   },
 });

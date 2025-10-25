@@ -1,21 +1,16 @@
+const readme = `
 # Onfly - Gerenciador de Pedidos
 
 Este é um projeto full-stack de gerenciamento de pedidos, construído com Laravel (Backend) e Vue.js/Vuetify (Frontend), totalmente containerizado com Docker.
 
 ## Principais Funcionalidades
 
-* **Autenticação Completa:** Registro e Login via API (Laravel Sanctum).
-
+* **Autenticação Completa:** Registro e Login via API com JWT (JSON Web Token).
 * **Controle de Acesso (ACL):**
-
   * **Usuário Admin:** Visualiza todos os pedidos, filtra por usuário e pode alterar o status.
-
   * **Usuário Comum:** Visualiza e cria apenas seus próprios pedidos.
-
 * **Gerenciamento de Pedidos:** CRUD completo de pedidos de viagem (destino, datas).
-
 * **Notificações por Email:** Disparo automático de emails (via Mailtrap) para o usuário quando o status de seu pedido é alterado por um admin.
-
 * **Dashboard Reativo:** Tabela de pedidos com filtros dinâmicos e feedback visual (loading) em tempo real.
 
 ## Tecnologias Utilizadas
@@ -25,7 +20,7 @@ Este é um projeto full-stack de gerenciamento de pedidos, construído com Larav
 | | PHP 8.2 | Vue 3 (Composition API) | 
 | | Laravel 12 | Vuetify 3 | 
 | | MySQL | Pinia (Gerenciamento de Estado) | 
-| | Laravel Sanctum (Auth) | Vue Router | 
+| | JWT (tymon/jwt-auth) | Vue Router | 
 | | Mailtrap (Testes de Email) | Vite (Build Tool) | 
 | | Docker & Docker Compose | Axios | 
 
@@ -34,11 +29,8 @@ Este é um projeto full-stack de gerenciamento de pedidos, construído com Larav
 Antes de começar, garanta que você tenha as seguintes ferramentas instaladas:
 
 * [Docker](https://www.docker.com/get-started)
-
 * [Docker Compose](https://docs.docker.com/compose/install/)
-
 * [Node.js](https://nodejs.org/en/) (v20 ou superior)
-
 * NPM (geralmente incluído no Node.js)
 
 ## 🚀 Começando (Rodando o Projeto)
@@ -56,7 +48,7 @@ git clone <repo-url>
 O backend roda inteiramente dentro de containers Docker.
 
 ```bash
-cd backend
+cd onfly-teste/backend
 ```
 
 **a. Configurar `.env`**
@@ -108,13 +100,30 @@ php artisan db:seed --class=UserSeeder
 
 > **Usuários de Teste Criados:**
 >
-> * **Admin:** `user@adm.test` (senha: `1234a56`)
->
+> * **Admin:** `user@adm.test` (senha: `123456`)
 > * **Comum:** `user@local.test` (senha: `123456`)
 
 Saia do container (`exit`).
 
-### 3. Configuração do Frontend (Local)
+### 3. Configuração do JWT
+
+O Laravel usa o pacote **tymon/jwt-auth** para autenticação via token JWT.
+
+Esses passos já estão automatizados no container via entrypoint:
+
+```bash
+php artisan vendor:publish --provider="TymonJWTAuthProvidersLaravelServiceProvider"
+php artisan jwt:secret
+```
+
+O comando `jwt:secret` gera uma chave única e a adiciona automaticamente no seu arquivo `.env`:
+```env
+JWT_SECRET=chave_gerada_automatica
+```
+
+O backend usa o guard `auth:api` configurado para JWT no arquivo `config/auth.php`.
+
+### 4. Configuração do Frontend (Local)
 
 O frontend rodará localmente em sua máquina, consumindo a API do Docker.
 
@@ -134,24 +143,22 @@ npm install
 npm run dev
 ```
 
-### 4. Aplicação em Execução
+### 5. Aplicação em Execução
 
 Parabéns! A aplicação está pronta:
 
 * **API Backend:** `http://localhost:8000`
-
 * **Aplicação Frontend:** `http://localhost:5173` (ou a porta indicada pelo Vite)
 
-## 🧪 Testes (Backend)
+## 🔐 Autenticação com JWT
 
-Todos os testes unitários e de feature foram criados. Para rodá-los, entre no container da aplicação e execute o Artisan:
-
-```bash
-docker exec -it onfly-app bash
-
-# Dentro do container
-php artisan test
-```
+* Após o login (`POST /api/login`), o backend retorna um **token JWT** e os dados do usuário.
+* O frontend salva o token no **localStorage**.
+* Todas as requisições autenticadas enviam o header:
+  ```http
+  Authorization: Bearer <seu_token_jwt>
+  ```
+* O logout apenas remove o token localmente (não há sessão no servidor).
 
 ## Endpoints Principais da API
 
@@ -160,9 +167,9 @@ php artisan test
 | **Método** | **Rota** | **Descrição** | 
 | :--- | :--- | :--- |
 | POST | `/api/register` | Criar usuário (aceita `is_admin`) | 
-| POST | `/api/login` | Login e retorna token Sanctum | 
+| POST | `/api/login` | Login e retorna token JWT | 
 | GET | `/api/user` | (Autenticado) Dados do usuário | 
-| POST | `/api/logout` | (Autenticado) Invalida o token | 
+| POST | `/api/logout` | (Autenticado) Invalida o token local | 
 
 ### Pedidos (Autenticado)
 
@@ -178,39 +185,32 @@ php artisan test
 ### Backend (Laravel)
 
 * `app/Http/Controllers`: Recebe requests e retorna JSON.
-
 * `app/Services`: Camada de regras de negócio.
-
 * `app/Repositories`: Camada de acesso ao banco (Eloquent).
-
 * `app/Http/Requests`: Validação de dados de entrada.
-
 * `app/Mail`: Classes de Mailable para notificações.
-
 * `routes/api.php`: Definição dos endpoints.
-
 * `tests/`: Testes unitários e de feature (Pest).
 
 ### Frontend (Vue)
 
 * `src/views`: Telas principais (Login.vue, Dashboard.vue).
-
 * `src/components`: Componentes reutilizáveis (PedidosTable.vue, NavBar.vue).
-
 * `src/stores`: Gerenciamento de estado (Pinia) para usuário e auth.
-
 * `src/router`: Rotas do Vue Router.
-
-* `src/axios.js`: Instância do Axios pré-configurada com a URL da API.
+* `src/axios.js`: Instância do Axios pré-configurada com a URL da API e token JWT.
 
 ## Observações e Dicas
 
 * **Emails:** A funcionalidade de envio de emails (alteração de status) só funcionará se as credenciais do Mailtrap estiverem corretas no `.env` do backend.
-
+* **JWT:** Se a aplicação for escalada em múltiplos containers, use o mesmo `JWT_SECRET` em todos.
 * **Cache do Laravel:** Se você alterar o `.env` com o container já rodando, limpe o cache de configuração do Laravel:
 
   ```bash
   docker exec -it onfly-app php artisan config:clear
   ```
 
-* **APP_KEY:** A `APP_KEY` do Laravel é gerada automaticamente pelo `Dockerfile` durante o build.
+* **APP_KEY e JWT_SECRET:** São gerados automaticamente pelo entrypoint do container na primeira execução.
+`;
+
+export default readme;

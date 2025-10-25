@@ -5,17 +5,25 @@ namespace Tests\Unit;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Pedido;
-use Laravel\Sanctum\Sanctum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PedidoTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Gera um token JWT e define o header Authorization.
+     */
+    protected function actingAsJwt(User $user): self
+    {
+        $token = JWTAuth::fromUser($user);
+        return $this->withHeader('Authorization', "Bearer {$token}");
+    }
+
     public function test_user_can_create_pedido()
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
 
         $data = [
             'destino' => 'Onfly Jr',
@@ -23,7 +31,8 @@ class PedidoTest extends TestCase
             'data_volta' => '2025-12-05',
         ];
 
-        $response = $this->postJson('/api/pedidos', $data);
+        $response = $this->actingAsJwt($user)
+            ->postJson('/api/pedidos', $data);
 
         $response->assertStatus(201)
                  ->assertJsonFragment(['destino' => 'Onfly Jr']);
@@ -39,9 +48,8 @@ class PedidoTest extends TestCase
         $user = User::factory()->create();
         $pedido = Pedido::factory()->create(['user_id' => $user->id]);
 
-        Sanctum::actingAs($user);
-
-        $response = $this->getJson('/api/pedidos');
+        $response = $this->actingAsJwt($user)
+            ->getJson('/api/pedidos');
 
         $response->assertStatus(200)
                  ->assertJsonFragment(['id' => $pedido->id]);
@@ -52,11 +60,10 @@ class PedidoTest extends TestCase
         $admin = User::factory()->create(['is_admin' => 1]);
         $pedido = Pedido::factory()->create(['status' => 'solicitado']);
 
-        Sanctum::actingAs($admin);
-
-        $response = $this->patchJson("/api/pedidos/{$pedido->id}/status", [
-            'status' => 'aprovado'
-        ]);
+        $response = $this->actingAsJwt($admin)
+            ->patchJson("/api/pedidos/{$pedido->id}/status", [
+                'status' => 'aprovado'
+            ]);
 
         $response->assertStatus(200)
                  ->assertJsonFragment(['status' => 'aprovado']);
@@ -67,18 +74,20 @@ class PedidoTest extends TestCase
         $user = User::factory()->create(['is_admin' => 0]);
         $pedido = Pedido::factory()->create(['status' => 'solicitado']);
 
-        Sanctum::actingAs($user);
-
-        $response = $this->patchJson("/api/pedidos/{$pedido->id}/status", [
-            'status' => 'aprovado'
-        ]);
+        $response = $this->actingAsJwt($user)
+            ->patchJson("/api/pedidos/{$pedido->id}/status", [
+                'status' => 'aprovado'
+            ]);
 
         $response->assertStatus(400)
                  ->assertJsonFragment([
                      'error' => 'É necessário ser um administrador para alterar status de um pedido.'
                  ]);
 
-        $this->assertDatabaseHas('pedidos', ['id' => $pedido->id, 'status' => 'solicitado']);
+        $this->assertDatabaseHas('pedidos', [
+            'id' => $pedido->id,
+            'status' => 'solicitado'
+        ]);
     }
 
     public function test_cannot_cancel_approved_pedido()
@@ -86,17 +95,19 @@ class PedidoTest extends TestCase
         $admin = User::factory()->create(['is_admin' => 1]);
         $pedido = Pedido::factory()->create(['status' => 'aprovado']);
 
-        Sanctum::actingAs($admin);
-
-        $response = $this->patchJson("/api/pedidos/{$pedido->id}/status", [
-            'status' => 'cancelado'
-        ]);
+        $response = $this->actingAsJwt($admin)
+            ->patchJson("/api/pedidos/{$pedido->id}/status", [
+                'status' => 'cancelado'
+            ]);
 
         $response->assertStatus(400)
                  ->assertJsonFragment([
                      'error' => 'Não é possível cancelar um pedido já aprovado.'
                  ]);
 
-        $this->assertDatabaseHas('pedidos', ['id' => $pedido->id, 'status' => 'aprovado']);
+        $this->assertDatabaseHas('pedidos', [
+            'id' => $pedido->id,
+            'status' => 'aprovado'
+        ]);
     }
 }

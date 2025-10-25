@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Repositories\AuthRepository;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Exception;
 
 class AuthService
@@ -23,7 +25,7 @@ class AuthService
         $data['password'] = Hash::make($data['password']);
         $user = $this->repository->createUser($data);
 
-        $token = $user->createToken('api-token')->plainTextToken;
+        $token = JWTAuth::fromUser($user);
 
         return [
             'user' => $user,
@@ -33,26 +35,18 @@ class AuthService
 
     public function login(array $data)
     {
-        // Simulando um tempo de espera para exibir os loadings no front
-        sleep(1.5);
-
-        $user = $this->repository->findByEmail($data['email']);
-
-        if (! $user || ! Hash::check($data['password'], $user->password)) {
-            throw new Exception('Usuário ou senha estão incorretos.');
+        if (! $token = JWTAuth::attempt($data)) {
+            throw new Exception('Credenciais inválidas.');
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
         return [
-            'message' => 'ok',
-            'token' => $token,
-            'user' => $user
+            'user' => auth()->user(),
+            'token' => $token
         ];
     }
 
     public function logout($user)
     {
-        $user->currentAccessToken()->delete();
+        JWTAuth::invalidate(JWTAuth::getToken());
     }
 }

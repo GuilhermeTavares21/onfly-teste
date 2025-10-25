@@ -8,12 +8,9 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const pinia = getActivePinia();
-  if (pinia) {
-    const userStore = pinia._s.get('user');
-    if (userStore?.token) {
-      config.headers.Authorization = `Bearer ${userStore.token}`;
-    }
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
