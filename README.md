@@ -49,6 +49,7 @@ O backend roda inteiramente dentro de containers Docker.
 
 ```bash
 cd onfly-teste/backend
+cd onfly-teste/backend
 ```
 
 **a. Configurar `.env`**
@@ -100,7 +101,8 @@ php artisan db:seed --class=UserSeeder
 
 > **Usuários de Teste Criados:**
 >
-> * **Admin:** `user@adm.test` (senha: `123456`)
+> * **Admin:** `user@adm.test` (senha: `1234a56`)
+>
 > * **Comum:** `user@local.test` (senha: `123456`)
 
 Saia do container (`exit`).
@@ -128,10 +130,12 @@ O backend usa o guard `auth:api` configurado para JWT no arquivo `config/auth.ph
 O frontend rodará localmente em sua máquina, consumindo a API do Docker.
 
 ```bash
-cd frontend
+cd onfly-teste/frontend
 ```
 
 **a. Instalar Dependências**
+
+Utilize Node na versão 20 ou superior.
 
 ```bash
 npm install
