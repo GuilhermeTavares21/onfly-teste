@@ -99,7 +99,7 @@ php artisan db:seed --class=UserSeeder
 
 > **Usuários de Teste Criados:**
 >
-> * **Admin:** `user@adm.test` (senha: `1234a56`)
+> * **Admin:** `user@adm.test` (senha: `123456`)
 >
 > * **Comum:** `user@local.test` (senha: `123456`)
 
@@ -213,5 +213,3 @@ Parabéns! A aplicação está pronta:
   ```
 
 * **APP_KEY e JWT_SECRET:** São gerados automaticamente pelo entrypoint do container na primeira execução.
-
-export default readme;
